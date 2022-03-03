@@ -9,51 +9,57 @@ class TodoItem {
   final String content;
   final bool isDone;
   final DateTime createdAt;
-  final int sem;
+  final int? year;
+  final int? semno;
 
-  TodoItem({
-    this.id,
-    required this.content,
-    this.isDone = false,
-    required this.createdAt,
-    required this.sem,
-  });
+  TodoItem(
+      {this.id,
+      required this.content,
+      this.isDone = false,
+      required this.createdAt,
+      required this.year,
+      required this.semno});
 
   TodoItem.fromJsonMap(Map<String, dynamic> map)
       : id = map['id'] as int,
         content = map['content'] as String,
         isDone = map['isDone'] == 1,
         createdAt =
-            DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int,
-            ),
-        sem = map['map'] as int
-;
+            DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
+        year = map['year'] as int,
+        semno = map['semno'] as int;
 
   Map<String, dynamic> toJsonMap() => {
         'id': id,
         'content': content,
         'isDone': isDone ? 1 : 0,
         'createdAt': createdAt.millisecondsSinceEpoch,
-        'sem':sem
+        'year': year,
+        'semno': semno
       };
 }
 
 class SqliteExample extends StatefulWidget {
-  const SqliteExample({Key? key}) : super(key: key);
-
+  int? year;
+  int? semno;
+  SqliteExample({required this.year, required this.semno});
   @override
-  _SqliteExampleState createState() => _SqliteExampleState();
+  _SqliteExampleState createState() =>
+      _SqliteExampleState(yeardata: year, semnodata: semno);
 }
 
 class _SqliteExampleState extends State<SqliteExample> {
-  static const kDbFileName = 'sqflite_ex.db';
-  static const kDbTableName = 'example_tbl';
+  int? yeardata;
+  int? semnodata;
+  _SqliteExampleState({required this.yeardata, required this.semnodata});
+
+  static const kDbFileName = 'sqflite_x.db';
+  static const kDbTableName = 'asi';
   final AsyncMemoizer _memoizer = AsyncMemoizer();
 
   late Database _db;
   List<TodoItem> _todos = [];
 
-  // Opens a db local file. Creates the db table if it's not yet created.
   Future<void> _initDb() async {
     final dbFolder = await getDatabasesPath();
     if (!await Directory(dbFolder).exists()) {
@@ -71,37 +77,36 @@ class _SqliteExampleState extends State<SqliteExample> {
           isDone BIT NOT NULL,
           content TEXT,
           createdAt INT,
-          sem INT)
+          year INT,
+          semno INT
+          )
         ''',
         );
       },
     );
   }
 
-  // Retrieves rows from the db table.
   Future<void> _getTodoItems() async {
     final List<Map<String, dynamic>> jsons =
-        await this._db.rawQuery('SELECT * FROM $kDbTableName');
+        await this._db.rawQuery('SELECT * FROM $kDbTableName WHERE (year==${yeardata} AND semno==${semnodata})');
     print('${jsons.length} rows retrieved from db!');
     this._todos = jsons.map((json) => TodoItem.fromJsonMap(json)).toList();
   }
 
-  // Inserts records to the db table.
-  // Note we don't need to explicitly set the primary key (id), it'll auto
-  // increment.
   Future<void> _addTodoItem(TodoItem todo) async {
     await this._db.transaction(
       (Transaction txn) async {
         final int id = await txn.rawInsert(
           '''
           INSERT INTO $kDbTableName
-            (content, isDone, createdAt)
+            (content, isDone, createdAt,year,semno)
           VALUES
             (
               "${todo.content}",
               ${todo.isDone ? 1 : 0}, 
               ${todo.createdAt.millisecondsSinceEpoch},
-              ${todo.sem}
+              ${todo.year},
+              ${todo.semno}
             )''',
         );
         print('Inserted todo item with id=$id.');
@@ -121,7 +126,6 @@ class _SqliteExampleState extends State<SqliteExample> {
     print('Updated $count records in db.');
   }
 
-  // Deletes records in the db table.
   Future<void> _deleteTodoItem(TodoItem todo) async {
     final count = await this._db.rawDelete(
       '''
@@ -199,10 +203,10 @@ class _SqliteExampleState extends State<SqliteExample> {
       onPressed: () async {
         await _addTodoItem(
           TodoItem(
-            content: "dfvsd",
-            createdAt: DateTime.now(),
-            sem: 1
-          ),
+              content: "Dfvdsvfdsv",
+              createdAt: DateTime.now(),
+              year: yeardata,
+              semno: semnodata),
         );
         _updateUI();
       },

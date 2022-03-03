@@ -1,10 +1,6 @@
-import 'dart:math';
-
-import 'package:assignment_tracker/year/first_year.dart';
+import 'package:assignment_tracker/year/year.dart';
 import 'package:flutter/material.dart';
-import 'package:circular_menu/circular_menu.dart';
 import 'package:animated_radial_menu/animated_radial_menu.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -27,20 +23,26 @@ class _HomeScreenState extends State<HomeScreen> {
         RadialButton(
             icon: Icon(Icons.looks_one),
             onPress: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_)=>FirstYear()));
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>Year(a:1)));
             },
             buttonColor: Colors.teal),
         RadialButton(
             icon: Icon(Icons.looks_two),
-            onPress: () {},
+            onPress: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>Year(a:2)));
+            },
             buttonColor: Colors.orange),
         RadialButton(
             icon: Icon(Icons.looks_3),
-            onPress: () {},
+            onPress: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>Year(a:3)));
+            },
             buttonColor: Colors.indigo),
         RadialButton(
             icon: Icon(Icons.looks_4),
-            onPress: () {},
+            onPress: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>Year(a:4)));
+            },
             buttonColor: Colors.pink),
       ]),
     );
